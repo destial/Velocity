@@ -70,7 +70,7 @@ public class VelocityConfiguration implements ProxyConfig {
   @Expose
   private boolean preventClientProxyConnections = false;
   @Expose
-  private PlayerInfoForwarding defaultPlayerInfoForwardingMode = PlayerInfoForwarding.NONE;
+  private PlayerInfoForwarding defaultForwardingMode = PlayerInfoForwarding.NONE;
   private byte[] forwardingSecret = generateRandomString(12).getBytes(StandardCharsets.UTF_8);
   @Expose
   private boolean announceForge = false;
@@ -105,7 +105,7 @@ public class VelocityConfiguration implements ProxyConfig {
 
   private VelocityConfiguration(String bind, String motd, int showMaxPlayers, boolean onlineMode,
       boolean preventClientProxyConnections, boolean announceForge,
-      PlayerInfoForwarding playerInfoForwardingMode, byte[] forwardingSecret,
+      PlayerInfoForwarding defaultForwardingMode, byte[] forwardingSecret,
       boolean onlineModeKickExistingPlayers, PingPassthroughMode pingPassthrough,
       boolean samplePlayersInPing, boolean enablePlayerAddressLogging, Servers servers,
       ForcedHosts forcedHosts, Advanced advanced, Query query, Metrics metrics,
@@ -116,7 +116,7 @@ public class VelocityConfiguration implements ProxyConfig {
     this.onlineMode = onlineMode;
     this.preventClientProxyConnections = preventClientProxyConnections;
     this.announceForge = announceForge;
-    this.defaultPlayerInfoForwardingMode = playerInfoForwardingMode;
+    this.defaultForwardingMode = defaultForwardingMode;
     this.forwardingSecret = forwardingSecret;
     this.onlineModeKickExistingPlayers = onlineModeKickExistingPlayers;
     this.pingPassthrough = pingPassthrough;
@@ -159,8 +159,8 @@ public class VelocityConfiguration implements ProxyConfig {
     for (Map.Entry<String, PlayerInfoForwarding> entry : servers.getServerForwardingModes().entrySet()) {
       switch (entry.getValue()) {
         case NONE:
-          logger.warn("Player info forwarding is disabled for " + entry.getKey() + "!"
-              + " All players will appear to be connecting from the proxy and will have offline-mode UUIDs.");
+          logger.warn("Player info forwarding is disabled for {}!"
+              + " All players will appear to be connecting from the proxy and will have offline-mode UUIDs.", entry.getKey());
           break;
         case MODERN:
         case BUNGEEGUARD:
@@ -171,7 +171,7 @@ public class VelocityConfiguration implements ProxyConfig {
       }
     }
 
-    switch (defaultPlayerInfoForwardingMode) {
+    switch (defaultForwardingMode) {
       case NONE:
         logger.warn("Player info forwarding is disabled by default! All players will appear to be connecting "
             + "from the proxy and will have offline-mode UUIDs.");
@@ -186,7 +186,7 @@ public class VelocityConfiguration implements ProxyConfig {
 
     if (requireForwardingSecret && (forwardingSecret == null || forwardingSecret.length == 0)) {
       logger.error("You don't have a forwarding secret set. This is required for security. "
-          + "See https://docs.papermc.io/velocity/player-information-forwarding for more details.");
+          + "See https://docs.papermc.io/velocity/player-information-forwarding#configuring-modern-forwarding for more details.");
       valid = false;
     }
 
@@ -321,12 +321,12 @@ public class VelocityConfiguration implements ProxyConfig {
     return preventClientProxyConnections;
   }
 
-  public PlayerInfoForwarding getDefaultPlayerInfoForwardingMode() {
-    return defaultPlayerInfoForwardingMode;
+  public PlayerInfoForwarding getDefaultForwardingMode() {
+    return defaultForwardingMode;
   }
 
-  public PlayerInfoForwarding getServerPlayerInfoForwardingMode(String server) {
-    return servers.getServerForwardingModes().getOrDefault(server, defaultPlayerInfoForwardingMode);
+  public PlayerInfoForwarding getServerForwardingMode(String server) {
+    return servers.getServerForwardingModes().getOrDefault(server, defaultForwardingMode);
   }
 
   public byte[] getForwardingSecret() {
@@ -479,7 +479,7 @@ public class VelocityConfiguration implements ProxyConfig {
         .add("motd", motd)
         .add("showMaxPlayers", showMaxPlayers)
         .add("onlineMode", onlineMode)
-        .add("defaultPlayerInfoForwardingMode", defaultPlayerInfoForwardingMode)
+        .add("defaultForwardingMode", defaultForwardingMode)
         .add("forwardingSecret", forwardingSecret)
         .add("announceForge", announceForge)
         .add("servers", servers)
